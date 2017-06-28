@@ -17,6 +17,7 @@ namespace Game4
         Chara ship;
         Chara[] missile;
         int missileCount;
+        Chara enemy;
 
         public Form1()
         {
@@ -37,6 +38,13 @@ namespace Game4
                 charaList.Add(missile[i]);
                 missile[i].Visible = false;
             }
+            //敵を作成する
+            enemy = new Chara(Properties.Resources.Enemy);
+            enemy.x = ClientSize.Width / 2;
+            enemy.y = 0;
+            enemy.Rot = 180;
+            charaList.Add(enemy);
+
             //初期位置の設定
             ship.X = 100;
             ship.Y = 100;
@@ -81,8 +89,11 @@ namespace Game4
                 //戦闘機の移動処理
                 ship.x += (float)Math.Sin(ship.Rot * 3.14 / 180) * speed;
                 ship.y -= (float)Math.Cos(ship.Rot * 3.14 / 180) * speed;
+                //敵の移動処理
+                enemy.x += (float)Math.Sin(enemy.Rot * 3.14 / 180);
+                enemy.y -= (float)Math.Cos(enemy.Rot * 3.14 / 180);
                 //ミサイルの移動処理
-                for(int j = 0; j < missile.Length; j++)
+                for (int j = 0; j < missile.Length; j++)
                 {
                     //表示されているミサイルを探す
                     if (missile[j].Visible)
@@ -95,7 +106,7 @@ namespace Game4
                             missile[j].X1 > ClientSize.Width &&
                             missile[j].X2 > ClientSize.Width ||
                             missile[j].Y1 < 0 && missile[j].Y2 < 0 ||
-                            missile[j].Y1 > ClientSize.Width &&
+                            missile[j].Y1 > ClientSize.Height &&
                             missile[j].Y2 > ClientSize.Height)
                             missile[j].Visible = false;
                     }
