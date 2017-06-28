@@ -15,7 +15,8 @@ namespace Game4
         List<Chara> charaList;
         TimeCounter timeCount;
         Chara ship;
-        Chara missile;
+        Chara[] missile;
+        int missileCount;
 
         public Form1()
         {
@@ -28,9 +29,14 @@ namespace Game4
             charaList = new List<Chara>();
             ship = new Chara(Properties.Resources.ship);
             charaList.Add(ship);
-            missile = new Chara(Properties.Resources.Missile);
-            charaList.Add(missile);
 
+            //ミサイルを複数作成する
+            missile = new Chara[3];
+            for(int i = 0; i < missile.Length; i++) {
+                missile[i] = new Chara(Properties.Resources.Missile);
+                charaList.Add(missile[i]);
+                missile[i].Visible = false;
+            }
             //初期位置の設定
             ship.X = 100;
             ship.Y = 100;
@@ -51,15 +57,50 @@ namespace Game4
                 if (Base.GetAsyncKeyState(Keys.Down) < 0)
                     speed = -1.0f;
 
-                if(Base.GetAsyncKeyState(Keys.Space) < 0)
+                if (missileCount > 0)
+                    --missileCount;
+                if (Base.GetAsyncKeyState(Keys.Space) < 0 && missileCount == 0)
                 {
-                    missile.x = ship.x;
-                    missile.y = ship.y;
-                    missile.Rot = ship.Rot;
-                }
+                    //ミサイル発射
+                    for(int j = 0; j < missile.Length; j++)
+                    {
+                        //使われていないミサイルを探す
+                        if(missile[j].Visible == false)
+                        {
+                            missileCount = 50;
+                            missile[j].x = ship.x;
+                            missile[j].y = ship.y;
+                            missile[j].Rot = ship.Rot;
+                            missile[j].Visible = true;
+                            break;
+                        }
+                    }
 
+
+                }
+                //戦闘機の移動処理
                 ship.x += (float)Math.Sin(ship.Rot * 3.14 / 180) * speed;
                 ship.y -= (float)Math.Cos(ship.Rot * 3.14 / 180) * speed;
+                //ミサイルの移動処理
+                for(int j = 0; j < missile.Length; j++)
+                {
+                    //表示されているミサイルを探す
+                    if (missile[j].Visible)
+                    {
+                        missile[j].x += (float)Math.Sin(missile[j].Rot * 3.14 / 180);
+                        missile[j].y -= (float)Math.Cos(missile[j].Rot * 3.14 / 180);
+
+                        //ミサイルが画面外に出たかどうか
+                        if (missile[j].X1 < 0 && missile[j].X2 < 0 ||
+                            missile[j].X1 > ClientSize.Width &&
+                            missile[j].X2 > ClientSize.Width ||
+                            missile[j].Y1 < 0 && missile[j].Y2 < 0 ||
+                            missile[j].Y1 > ClientSize.Width &&
+                            missile[j].Y2 > ClientSize.Height)
+                            missile[j].Visible = false;
+                    }
+                }
+
 
             }
             Refresh();
